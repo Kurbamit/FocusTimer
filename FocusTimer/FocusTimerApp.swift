@@ -9,9 +9,19 @@ import SwiftUI
 
 @main
 struct FocusTimerApp: App {
+    @StateObject private var viewModel = TimerViewModel()
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        MenuBarExtra {
+            ContentView(viewModel: viewModel)
+        } label: {
+            if let text = viewModel.menuBarText {
+                Text(text)
+                    .font(.system(.body, design: .monospaced))
+            } else {
+                Image(systemName: "timer")
+            }
         }
+        .menuBarExtraStyle(.window)
     }
 }
