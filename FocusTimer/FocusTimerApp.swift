@@ -9,7 +9,14 @@ import SwiftUI
 
 @main
 struct FocusTimerApp: App {
-    @StateObject private var viewModel = TimerViewModel()
+    @StateObject private var settings: AppSettings
+    @StateObject private var viewModel: TimerViewModel
+
+    init() {
+        let settings = AppSettings()
+        _settings = StateObject(wrappedValue: settings)
+        _viewModel = StateObject(wrappedValue: TimerViewModel(settings: settings))
+    }
 
     var body: some Scene {
         MenuBarExtra {
@@ -23,5 +30,9 @@ struct FocusTimerApp: App {
             }
         }
         .menuBarExtraStyle(.window)
+
+        Settings {
+            SettingsView(settings: settings)
+        }
     }
 }

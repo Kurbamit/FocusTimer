@@ -10,9 +10,21 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: TimerViewModel
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(spacing: 16) {
+            HStack {
+                Spacer()
+                Button {
+                    NSApp.activate(ignoringOtherApps: true)
+                    openSettings()
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .buttonStyle(.plain)
+            }
+
             Text(viewModel.phase.label)
                 .font(.headline)
                 .foregroundStyle(.secondary)
@@ -48,5 +60,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(viewModel: TimerViewModel())
+    ContentView(viewModel: TimerViewModel(settings: AppSettings()))
 }

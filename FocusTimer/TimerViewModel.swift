@@ -13,14 +13,6 @@ enum SessionPhase {
     case shortBreak
     case longBreak
 
-    var duration: TimeInterval {
-        switch self {
-        case .focus: return 25 * 60
-        case .shortBreak: return 5 * 60
-        case .longBreak: return 15 * 60
-        }
-    }
-
     var label: String {
         switch self {
         case .focus: return "Focus"
@@ -33,10 +25,11 @@ enum SessionPhase {
 @MainActor
 final class TimerViewModel: ObservableObject {
     @Published private(set) var phase: SessionPhase = .focus
-    @Published private(set) var timeRemaining: TimeInterval = SessionPhase.focus.duration
+    @Published private(set) var timeRemaining: TimeInterval
     @Published private(set) var isRunning = false
     @Published private(set) var sessionsCompletedToday = 0
 
+    private let settings: AppSettings
     private var timer: Timer?
     private var focusSessionsInCycle = 0
 
@@ -44,7 +37,9 @@ final class TimerViewModel: ObservableObject {
     private let countKey = "sessionsCompletedToday"
     private let countDateKey = "sessionsCompletedDate"
 
-    init() {
+    init(settings: AppSettings) {
+        self.settings = settings
+        self.timeRemaining = settings.duration(for: .focus)
         loadDailyCount()
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
@@ -82,7 +77,7 @@ final class TimerViewModel: ObservableObject {
 
     func reset() {
         pause()
-        timeRemaining = phase.duration
+        timeRemaining = settings.duration(for: phase)
     }
 
     private func tick() {
@@ -101,16 +96,20 @@ final class TimerViewModel: ObservableObject {
         if endedPhase == .focus {
             focusSessionsInCycle += 1
             incrementDailyCount()
-            phase = focusSessionsInCycle >= 4 ? .longBreak : .shortBreak
+            phase = focusSessionsInCycle >= settings.sessionsBeforeLongBreak ? .longBreak : .shortBreak
         } else {
             if endedPhase == .longBreak { focusSessionsInCycle = 0 }
             phase = .focus
         }
-        timeRemaining = phase.duration
+        timeRemaining = settings.duration(for: phase)
     }
 
     private func notifySessionEnd(for endedPhase: SessionPhase) {
-        NSSound(named: "Glass")?.play()
+        if settings.soundEnabled {
+            NSSound(named: "Glass")?.play()
+        }
+
+        guard settings.notificationsEnabled else { return }
 
         let content = UNMutableNotificationContent()
         content.title = "Focus Timer"
