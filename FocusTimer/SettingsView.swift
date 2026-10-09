@@ -10,6 +10,10 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            SettingsSection(title: "General") {
+                ToggleRow(title: "Launch at Login", isOn: $settings.launchAtLoginEnabled)
+            }
+
             SettingsSection(title: "Durations") {
                 StepperRow(title: "Focus", value: $settings.focusMinutes, range: 1...180, unit: "min")
                 Divider().padding(.leading, 12)

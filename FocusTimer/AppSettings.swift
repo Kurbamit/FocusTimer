@@ -5,9 +5,24 @@
 
 import Combine
 import Foundation
+import ServiceManagement
 
 @MainActor
 final class AppSettings: ObservableObject {
+    @Published var launchAtLoginEnabled: Bool {
+        didSet {
+            guard launchAtLoginEnabled != oldValue else { return }
+            do {
+                if launchAtLoginEnabled {
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch {
+                print("Failed to update Launch at Login: \(error)")
+            }
+        }
+    }
     @Published var focusMinutes: Int {
         didSet { defaults.set(focusMinutes, forKey: Keys.focusMinutes) }
     }
@@ -39,6 +54,7 @@ final class AppSettings: ObservableObject {
     }
 
     init() {
+        launchAtLoginEnabled = SMAppService.mainApp.status == .enabled
         focusMinutes = defaults.object(forKey: Keys.focusMinutes) as? Int ?? 25
         shortBreakMinutes = defaults.object(forKey: Keys.shortBreakMinutes) as? Int ?? 5
         longBreakMinutes = defaults.object(forKey: Keys.longBreakMinutes) as? Int ?? 15
