@@ -5,58 +5,37 @@
 //  Created by Dominykas Cernovas on 09/10/2026.
 //
 
-import AppKit
 import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: TimerViewModel
     @ObservedObject var stats: FocusStatsStore
-    @Environment(\.openSettings) private var openSettings
+    @State private var isShowingStats = false
 
     var body: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Spacer()
-                Button {
-                    NSApp.activate(ignoringOtherApps: true)
-                    openSettings()
-                } label: {
-                    Image(systemName: "gearshape")
+        if isShowingStats {
+            VStack(alignment: .leading, spacing: 12) {
+                Button(action: showTimer) {
+                    Image(systemName: "chevron.left")
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Back")
+
+                StatsView(stats: stats)
             }
-
-            Text(viewModel.phase.label)
-                .font(.headline)
-                .foregroundStyle(.secondary)
-
-            Text(viewModel.timeRemainingText)
-                .font(.system(size: 40, weight: .medium, design: .monospaced))
-                .monospacedDigit()
-
-            HStack(spacing: 12) {
-                Button(viewModel.isRunning ? "Pause" : "Start") {
-                    viewModel.toggleStartPause()
-                }
-                .keyboardShortcut(.defaultAction)
-
-                Button("Reset") {
-                    viewModel.reset()
-                }
-            }
-
-            Text("Today: \(FocusStatsStore.formatted(minutes: stats.todayMinutes)) · \(stats.todaySessionCount) session\(stats.todaySessionCount == 1 ? "" : "s")")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            Divider()
-
-            Button("Quit") {
-                NSApplication.shared.terminate(nil)
-            }
+            .padding(24)
+            .frame(width: 360)
+        } else {
+            TimerControlsView(viewModel: viewModel, stats: stats, onShowStats: showStats)
         }
-        .padding(20)
-        .frame(width: 220)
+    }
+
+    private func showStats() {
+        isShowingStats = true
+    }
+
+    private func showTimer() {
+        isShowingStats = false
     }
 }
 
