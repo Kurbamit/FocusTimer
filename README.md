@@ -2,6 +2,12 @@
 
 A lightweight Pomodoro-style focus timer that lives in the macOS menu bar.
 
+## Download
+
+[**Download FocusTimer.zip**](https://github.com/Kurbamit/FocusTimer/releases/download/v1.0.0/FocusTimer.zip) (latest: [v1.0.0](https://github.com/Kurbamit/FocusTimer/releases/tag/v1.0.0))
+
+Unzip and drag `FocusTimer.app` to `/Applications`. On first launch, **right-click the app and choose Open** instead of double-clicking — it's signed with a personal Apple Developer certificate rather than a paid Developer ID, so Gatekeeper blocks a plain double-click the first time. After that it opens normally. (Alternative: run `xattr -cr /Applications/FocusTimer.app` in Terminal once.)
+
 ## Screenshots
 
 | Timer | Stats |
