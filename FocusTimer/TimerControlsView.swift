@@ -69,7 +69,7 @@ struct TimerControlsView: View {
                 .buttonStyle(.bordered)
             }
 
-            HStack(spacing: 6) {
+            VStack(spacing: 4) {
                 HStack(spacing: 3) {
                     KeyCapView(symbol: "⌃")
                     KeyCapView(symbol: "⌥")
