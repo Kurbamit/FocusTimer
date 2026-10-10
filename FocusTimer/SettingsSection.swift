@@ -19,7 +19,8 @@ struct SettingsSection<Content: View>: View {
             VStack(alignment: .leading, spacing: 0) {
                 content
             }
-            .background(.quaternary, in: .rect(cornerRadius: 10))
+            .background(.regularMaterial, in: .rect(cornerRadius: 12))
+            .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
         }
     }
 }

@@ -10,11 +10,11 @@ struct StatsView: View {
 
     var body: some View {
         SettingsSection(title: "Focus Time") {
-            StatRow(title: "Today", value: summary(minutes: stats.todayMinutes, sessions: stats.todaySessionCount))
+            StatRow(icon: "sun.max", title: "Today", value: summary(minutes: stats.todayMinutes, sessions: stats.todaySessionCount))
             Divider().padding(.leading, 12)
-            StatRow(title: "This Week", value: summary(minutes: stats.weekMinutes, sessions: stats.weekSessionCount))
+            StatRow(icon: "calendar", title: "This Week", value: summary(minutes: stats.weekMinutes, sessions: stats.weekSessionCount))
             Divider().padding(.leading, 12)
-            StatRow(title: "All Time", value: summary(minutes: stats.allTimeMinutes, sessions: stats.allTimeSessionCount))
+            StatRow(icon: "infinity", title: "All Time", value: summary(minutes: stats.allTimeMinutes, sessions: stats.allTimeSessionCount))
         }
     }
 

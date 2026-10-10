@@ -7,6 +7,7 @@ import AppKit
 import Carbon.HIToolbox
 import Combine
 import Foundation
+import SwiftUI
 import UserNotifications
 
 enum SessionPhase {
@@ -19,6 +20,22 @@ enum SessionPhase {
         case .focus: return "Focus"
         case .shortBreak: return "Short Break"
         case .longBreak: return "Long Break"
+        }
+    }
+
+    var tintColor: Color {
+        switch self {
+        case .focus: return .blue
+        case .shortBreak: return .green
+        case .longBreak: return .purple
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .focus: return "brain.head.profile"
+        case .shortBreak: return "cup.and.saucer.fill"
+        case .longBreak: return "moon.zzz.fill"
         }
     }
 }
@@ -48,7 +65,8 @@ final class TimerViewModel: ObservableObject {
     }
 
     deinit {
-        if let startPauseHotKeyID {
+        guard let startPauseHotKeyID else { return }
+        Task { @MainActor in
             GlobalHotKeyManager.shared.unregister(id: startPauseHotKeyID)
         }
     }
@@ -91,6 +109,11 @@ final class TimerViewModel: ObservableObject {
 
     var timeRemainingText: String {
         formatted(timeRemaining)
+    }
+
+    var progress: Double {
+        guard currentPhaseDuration > 0 else { return 0 }
+        return 1 - (timeRemaining / currentPhaseDuration)
     }
 
     func toggleStartPause() {

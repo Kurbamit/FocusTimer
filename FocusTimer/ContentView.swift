@@ -13,29 +13,43 @@ struct ContentView: View {
     @State private var isShowingStats = false
 
     var body: some View {
-        if isShowingStats {
-            VStack(alignment: .leading, spacing: 12) {
-                Button(action: showTimer) {
-                    Image(systemName: "chevron.left")
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Back")
+        ZStack {
+            if isShowingStats {
+                VStack(alignment: .leading, spacing: 12) {
+                    Button(action: showTimer) {
+                        Image(systemName: "chevron.left")
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Back")
 
-                StatsView(stats: stats)
+                    StatsView(stats: stats)
+                }
+                .padding(24)
+                .frame(width: 360)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .move(edge: .leading).combined(with: .opacity)
+                ))
+            } else {
+                TimerControlsView(viewModel: viewModel, stats: stats, onShowStats: showStats)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .trailing).combined(with: .opacity)
+                    ))
             }
-            .padding(24)
-            .frame(width: 360)
-        } else {
-            TimerControlsView(viewModel: viewModel, stats: stats, onShowStats: showStats)
         }
     }
 
     private func showStats() {
-        isShowingStats = true
+        withAnimation(.easeInOut(duration: 0.25)) {
+            isShowingStats = true
+        }
     }
 
     private func showTimer() {
-        isShowingStats = false
+        withAnimation(.easeInOut(duration: 0.25)) {
+            isShowingStats = false
+        }
     }
 }
 

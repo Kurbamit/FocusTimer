@@ -6,11 +6,15 @@
 import SwiftUI
 
 struct StatRow: View {
+    let icon: String
     let title: String
     let value: String
 
     var body: some View {
-        HStack {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .foregroundStyle(.secondary)
+                .frame(width: 16)
             Text(title)
             Spacer()
             Text(value)
@@ -23,7 +27,7 @@ struct StatRow: View {
 }
 
 #Preview {
-    StatRow(title: "Today", value: "1h 15m · 3 sessions")
+    StatRow(icon: "calendar", title: "Today", value: "1h 15m · 3 sessions")
         .padding()
         .frame(width: 320)
 }
