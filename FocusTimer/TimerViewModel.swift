@@ -27,20 +27,16 @@ final class TimerViewModel: ObservableObject {
     @Published private(set) var phase: SessionPhase = .focus
     @Published private(set) var timeRemaining: TimeInterval
     @Published private(set) var isRunning = false
-    @Published private(set) var sessionsCompletedToday = 0
 
     private let settings: AppSettings
+    private let stats: FocusStatsStore
     private var timer: Timer?
     private var focusSessionsInCycle = 0
 
-    private let defaults = UserDefaults.standard
-    private let countKey = "sessionsCompletedToday"
-    private let countDateKey = "sessionsCompletedDate"
-
-    init(settings: AppSettings) {
+    init(settings: AppSettings, stats: FocusStatsStore) {
         self.settings = settings
+        self.stats = stats
         self.timeRemaining = settings.duration(for: .focus)
-        loadDailyCount()
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
@@ -51,10 +47,6 @@ final class TimerViewModel: ObservableObject {
 
     var timeRemainingText: String {
         formatted(timeRemaining)
-    }
-
-    var statusText: String {
-        "\(sessionsCompletedToday) session\(sessionsCompletedToday == 1 ? "" : "s") done"
     }
 
     func toggleStartPause() {
@@ -95,7 +87,7 @@ final class TimerViewModel: ObservableObject {
 
         if endedPhase == .focus {
             focusSessionsInCycle += 1
-            incrementDailyCount()
+            stats.recordCompletedFocusSession(minutes: Int(settings.duration(for: .focus) / 60))
             phase = focusSessionsInCycle >= settings.sessionsBeforeLongBreak ? .longBreak : .shortBreak
         } else {
             if endedPhase == .longBreak { focusSessionsInCycle = 0 }
@@ -117,22 +109,6 @@ final class TimerViewModel: ObservableObject {
         content.sound = .default
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
-    }
-
-    private func incrementDailyCount() {
-        loadDailyCount()
-        sessionsCompletedToday += 1
-        defaults.set(sessionsCompletedToday, forKey: countKey)
-        defaults.set(Date(), forKey: countDateKey)
-    }
-
-    private func loadDailyCount() {
-        if let savedDate = defaults.object(forKey: countDateKey) as? Date,
-           Calendar.current.isDateInToday(savedDate) {
-            sessionsCompletedToday = defaults.integer(forKey: countKey)
-        } else {
-            sessionsCompletedToday = 0
-        }
     }
 
     private func formatted(_ interval: TimeInterval) -> String {

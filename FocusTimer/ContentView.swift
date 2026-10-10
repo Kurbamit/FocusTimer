@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: TimerViewModel
+    @ObservedObject var stats: FocusStatsStore
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
@@ -44,7 +45,7 @@ struct ContentView: View {
                 }
             }
 
-            Text(viewModel.statusText)
+            Text("Today: \(FocusStatsStore.formatted(minutes: stats.todayMinutes)) · \(stats.todaySessionCount) session\(stats.todaySessionCount == 1 ? "" : "s")")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
@@ -60,5 +61,7 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(viewModel: TimerViewModel(settings: AppSettings()))
+    let settings = AppSettings()
+    let stats = FocusStatsStore()
+    ContentView(viewModel: TimerViewModel(settings: settings, stats: stats), stats: stats)
 }
