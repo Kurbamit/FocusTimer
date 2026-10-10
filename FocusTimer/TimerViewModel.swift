@@ -33,6 +33,7 @@ final class TimerViewModel: ObservableObject {
     private var timer: Timer?
     private var focusSessionsInCycle = 0
     private var currentPhaseDuration: TimeInterval
+    private var cancellables = Set<AnyCancellable>()
 
     init(settings: AppSettings, stats: FocusStatsStore) {
         self.settings = settings
@@ -40,6 +41,26 @@ final class TimerViewModel: ObservableObject {
         self.timeRemaining = settings.duration(for: .focus)
         self.currentPhaseDuration = settings.duration(for: .focus)
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        observeSettingsChanges()
+    }
+
+    private func observeSettingsChanges() {
+        settings.$focusMinutes.dropFirst()
+            .sink { [weak self] minutes in self?.applyDurationChange(for: .focus, minutes: minutes) }
+            .store(in: &cancellables)
+        settings.$shortBreakMinutes.dropFirst()
+            .sink { [weak self] minutes in self?.applyDurationChange(for: .shortBreak, minutes: minutes) }
+            .store(in: &cancellables)
+        settings.$longBreakMinutes.dropFirst()
+            .sink { [weak self] minutes in self?.applyDurationChange(for: .longBreak, minutes: minutes) }
+            .store(in: &cancellables)
+    }
+
+    private func applyDurationChange(for changedPhase: SessionPhase, minutes: Int) {
+        guard changedPhase == phase, !isRunning else { return }
+        let duration = TimeInterval(minutes * 60)
+        timeRemaining = duration
+        currentPhaseDuration = duration
     }
 
     var menuBarText: String? {
