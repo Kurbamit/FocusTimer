@@ -32,11 +32,13 @@ final class TimerViewModel: ObservableObject {
     private let stats: FocusStatsStore
     private var timer: Timer?
     private var focusSessionsInCycle = 0
+    private var currentPhaseDuration: TimeInterval
 
     init(settings: AppSettings, stats: FocusStatsStore) {
         self.settings = settings
         self.stats = stats
         self.timeRemaining = settings.duration(for: .focus)
+        self.currentPhaseDuration = settings.duration(for: .focus)
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
@@ -70,6 +72,7 @@ final class TimerViewModel: ObservableObject {
     func reset() {
         pause()
         timeRemaining = settings.duration(for: phase)
+        currentPhaseDuration = timeRemaining
     }
 
     private func tick() {
@@ -87,13 +90,14 @@ final class TimerViewModel: ObservableObject {
 
         if endedPhase == .focus {
             focusSessionsInCycle += 1
-            stats.recordCompletedFocusSession(minutes: Int(settings.duration(for: .focus) / 60))
+            stats.recordCompletedFocusSession(minutes: Int(currentPhaseDuration / 60))
             phase = focusSessionsInCycle >= settings.sessionsBeforeLongBreak ? .longBreak : .shortBreak
         } else {
             if endedPhase == .longBreak { focusSessionsInCycle = 0 }
             phase = .focus
         }
         timeRemaining = settings.duration(for: phase)
+        currentPhaseDuration = timeRemaining
     }
 
     private func notifySessionEnd(for endedPhase: SessionPhase) {
