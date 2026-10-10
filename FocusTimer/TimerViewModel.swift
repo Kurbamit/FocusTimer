@@ -58,8 +58,10 @@ final class TimerViewModel: ObservableObject {
     func start() {
         guard !isRunning else { return }
         isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.tick() }
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            Task { @MainActor [weak self] in
+                self?.tick()
+            }
         }
     }
 
