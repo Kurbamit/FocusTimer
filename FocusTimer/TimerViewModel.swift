@@ -4,6 +4,7 @@
 //
 
 import AppKit
+import Carbon.HIToolbox
 import Combine
 import Foundation
 import UserNotifications
@@ -34,6 +35,7 @@ final class TimerViewModel: ObservableObject {
     private var focusSessionsInCycle = 0
     private var currentPhaseDuration: TimeInterval
     private var cancellables = Set<AnyCancellable>()
+    private var startPauseHotKeyID: UInt32?
 
     init(settings: AppSettings, stats: FocusStatsStore) {
         self.settings = settings
@@ -42,6 +44,25 @@ final class TimerViewModel: ObservableObject {
         self.currentPhaseDuration = settings.duration(for: .focus)
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         observeSettingsChanges()
+        registerGlobalHotKey()
+    }
+
+    deinit {
+        if let startPauseHotKeyID {
+            GlobalHotKeyManager.shared.unregister(id: startPauseHotKeyID)
+        }
+    }
+
+    /// ⌃⌥Space toggles start/pause from anywhere, without opening the popover.
+    private func registerGlobalHotKey() {
+        startPauseHotKeyID = GlobalHotKeyManager.shared.register(
+            keyCode: UInt32(kVK_Space),
+            modifiers: UInt32(controlKey | optionKey)
+        ) { [weak self] in
+            Task { @MainActor in
+                self?.toggleStartPause()
+            }
+        }
     }
 
     private func observeSettingsChanges() {

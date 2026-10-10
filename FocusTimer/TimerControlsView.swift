@@ -49,6 +49,10 @@ struct TimerControlsView: View {
                 }
             }
 
+            Text("⌃⌥Space to start/pause anywhere")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+
             Text("Today: \(FocusStatsStore.formatted(minutes: stats.todayMinutes)) · \(stats.todaySessionCount) session\(stats.todaySessionCount == 1 ? "" : "s")")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
